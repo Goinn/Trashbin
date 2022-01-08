@@ -2,15 +2,12 @@
 using MelonLoader;
 using System.Reflection;
 using UnityEngine;
-using HarmonyLib;
 using Mono.Data.Sqlite;
 using System.Data;
 using System.IO;
 using VRTK.UnityEventHelper;
 using Synth.Utils;
-using UnityEngine.Events;
 using System.Collections.Generic;
-using TMPro;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -184,15 +181,14 @@ namespace Trashbin
             warnTimer.Stop();
         }
 
-        //[HarmonyPatch(typeof(Util.Controller.ProfilesManagementController), "OnProfileItemClicked")]
-        //[HarmonyPatch(typeof(Synth.SongSelection.SongSelectionManager), "OpenSongSelectionMenu")]
         private static void ButtonInit()
         {
             bool twitchCredentials = false;
             var cs_instance = new Trashbin();
             MelonLogger.Msg("Trashbin init");
-            GameObject songSelection = GameObject.Find("SongSelection");
 
+            //Initialise new button
+            GameObject songSelection = GameObject.Find("SongSelection");
             Transform selectionSongPanel = songSelection.transform.Find("SelectionSongPanel");
             Transform centralPanel = selectionSongPanel.Find("CentralPanel");
             Transform songSelector = centralPanel.Find("Song Selection");
@@ -202,17 +198,31 @@ namespace Trashbin
             GameObject deleteButton = GameObject.Instantiate(blacklistButton.gameObject);
             deleteButton.transform.name = "DeleteSongButton";
             deleteButton.transform.SetParent(controls);
+
+            //Change button icon
             Transform deleteIcon = deleteButton.transform.Find("Icon");
-            deleteIcon.GetComponent<SpriteRenderer>().sprite.texture.name = "bt-Close-X";
-            
+            byte[] iconFile = File.ReadAllBytes("./Mods/Assets/bin.png");
+            Texture2D iconTexture = new Texture2D(2, 2);
+            iconTexture.LoadImage(iconFile);
+            iconTexture.name = "bt-Close-X";
+            Sprite iconSprite = Sprite.Create(iconTexture,new Rect(0,0.0f,iconTexture.width,iconTexture.height), new Vector2(0.5f, 0.5f));
+            iconSprite.name = "bt-X";
+            deleteIcon.GetComponent<SpriteRenderer>().sprite = iconSprite;
+            deleteIcon.localScale = new Vector3(0.15f, 0.15f, 1);
+
+
             //place button below volume control
             // get twitchauthsettings from game_infoprovider
-            //Game_InfoProvider.s_instance
+            Game_InfoProvider gipInstance = Game_InfoProvider.s_instance;
+            Type gipType = typeof(Game_InfoProvider);
+            FieldInfo fieldInfo = gipType.GetField("twitchAuth", BindingFlags.NonPublic | BindingFlags.Instance);
+            TwitchAuthSettings twitchAS = (TwitchAuthSettings)fieldInfo.GetValue(gipInstance);
+
             //if (TwitchAuthSettings.Channel)
-            if (twitchCredentials)
+            if (twitchAS.Channel != "")
             {
                 deleteButton.transform.localScale = new Vector3(0.65f, 0.65f, 1);
-                deleteButton.transform.localPosition = new Vector3(83946f, 3.0481f, 0);
+                deleteButton.transform.localPosition = new Vector3(8.3946f, 3.0481f, 0);
                 deleteButton.transform.localRotation = new Quaternion(0, 0, 0, 1);
             }
             else //if twitch credentials not setup take same position as blacklist button
@@ -222,12 +232,13 @@ namespace Trashbin
                 deleteButton.transform.localRotation = new Quaternion(0, 0, 0, 1);
             }
 
-
+            //Change tooltip text 
             Transform tooltip = deleteButton.transform.Find("Tooltip");
             Transform tooltipText = tooltip.Find("Text");
             tooltipText.GetComponentInChildren<LocalizationHelper>().enabled = false;
             tooltipText.GetComponentInChildren<TMPro.TMP_Text>().text = "Delete current song";
 
+            //Add event to button
             Type buttonHelper = typeof(VRTK_InteractableObject_UnityEvents);
             VRTK_InteractableObject_UnityEvents buttonEvent = (VRTK_InteractableObject_UnityEvents)deleteButton.GetComponent(buttonHelper);
             buttonEvent.OnUse.RemoveAllListeners();
@@ -251,6 +262,21 @@ namespace Trashbin
             base.OnSceneWasInitialized(buildIndex, sceneName);
             
             if (mainMenuScenes.Contains(sceneName)) ButtonInit();
+        }
+        
+        public override void OnApplicationQuit()
+        {
+            base.OnApplicationQuit();
+
+            SynthsFinder sf_instance = SynthsFinder.s_instance;
+            Type sf = typeof(SynthsFinder);
+            FieldInfo audioFilePathField = sf.GetField("AudioFileCachePath", BindingFlags.NonPublic | BindingFlags.Instance);
+            string audioFilePath = (string)audioFilePathField.GetValue(sf_instance);
+            if (Directory.Exists(audioFilePath))
+            {
+                Directory.Delete(audioFilePath, true);
+            }
+            MelonLogger.Msg("Cleared audio cache");
         }
     }
 }
