@@ -3,7 +3,7 @@
 Adds a button to delete songs for Synth Riders [PCVR]
 
 ## Setup
-!After an update you might have to either grab the newest release of CustomSounds or reinstall MelonLoader completely!
+!After an update you might have to either grab the newest release of Trashbin or reinstall MelonLoader completely!
 
 0. Backup your game files
 1. Prepare Synth Riders for the use with mods by following the installation instructions for MelonLoader:  https://melonwiki.xyz/#/?id=automated-installation
