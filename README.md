@@ -7,7 +7,7 @@ Adds a button to delete songs for Synth Riders [PCVR]
 ## Setup
 !After an update you might have to either grab the newest release of Trashbin or reinstall MelonLoader completely!
 
-0. Backup your game files
+0. Backup your game files (most important files are songs and settings)
 1. Prepare Synth Riders for the use with mods by following the installation instructions for MelonLoader:  https://wiki.synthriderz.com/en/guides/installing-mods
 2. Grab the newest version of Trashbin from releases and extract it to ./SynthRiders/Mods (create new directory if not existent)
 3. Profit?!
