@@ -34,6 +34,7 @@ namespace Trashbin
             Type ssm = typeof(Synth.SongSelection.SongSelectionManager);
             FieldInfo ssmInstanceInfo = ssm.GetField("s_instance", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
             Synth.SongSelection.SongSelectionManager ssmInstance = (Synth.SongSelection.SongSelectionManager)ssmInstanceInfo.GetValue(null);
+            int count = 0;
 
             if (ssmInstance.SelectedGameTrack.IsCustomSong)
             {
@@ -66,17 +67,32 @@ namespace Trashbin
                     MelonLogger.Msg("Opened DB connection");
                     IDbConnection dbcon = (IDbConnection)sf_instance.Dbcon;
                     IDbCommand dbCommand = dbcon.CreateCommand();
-                    IDbCommand cmndRead = dbcon.CreateCommand();
-                    IDataReader reader;
+                    IDbCommand cmndReadFile = dbcon.CreateCommand();
+                    IDbCommand cmndReadImg = dbcon.CreateCommand();
+                    IDataReader readerFile;
+                    IDataReader readerImg;
                     FieldInfo dbTableNameField = typeSF.GetField("dbTableName", BindingFlags.NonPublic | BindingFlags.Instance);
 
                     //get song info from DB
-                    string queryGet = "SELECT image_file FROM " + dbTableNameField.GetValue(sf_instance) + " WHERE file_name='" + synthFile.Name + "'"; // private field dbTableName
-                    MelonLogger.Msg(queryGet);
-                    cmndRead.CommandText = queryGet;
-                    reader = cmndRead.ExecuteReader();
-                    reader.Read();
-                    imageFilePath = reader[0].ToString();
+                    string queryGetFile = "SELECT image_file FROM " + dbTableNameField.GetValue(sf_instance) + " WHERE file_name='" + synthFile.Name + "'"; // private field dbTableName
+                    MelonLogger.Msg(queryGetFile);
+                    cmndReadFile.CommandText = queryGetFile;
+                    readerFile = cmndReadFile.ExecuteReader();
+                    readerFile.Read();
+                    imageFilePath = readerFile[0].ToString();
+                    readerFile.Close();
+
+                    //check for duplicate image files
+                    string queryGetImg = "SELECT image_file FROM " + dbTableNameField.GetValue(sf_instance) + " WHERE image_file='" + imageFilePath + "'"; // private field dbTableName
+                    MelonLogger.Msg(queryGetImg);
+                    cmndReadFile.CommandText = queryGetImg;
+                    readerImg = cmndReadFile.ExecuteReader();
+                    while (readerImg.Read())
+                    {
+                        count = count + 1;
+                    }
+                    if (count > 1)
+                    readerImg.Close();
 
                     //delete song info from db
                     MelonLogger.Msg("Creating query");
@@ -116,17 +132,13 @@ namespace Trashbin
                 }
                 catch (Exception ex)
                 {
-                    // IOException if you click the delete button to fast
-                    // wait for loading to finish
-                    // might be better with an existing status field
-
                     MelonLogger.Msg("Loading ongoing");
                     MelonLogger.Msg(ex);
                     return;
                 }
 
                 //Delete coresponding image file and leftover audio file
-                if (File.Exists(imageFilePath))
+                if (File.Exists(imageFilePath) & (count == 1))
                 {
                     File.Delete(imageFilePath);
                     MelonLogger.Msg("Deleted image file");
@@ -139,23 +151,7 @@ namespace Trashbin
                 // reload song list 
                 ssmInstance.RefreshSongList(false);
                 MelonLogger.Msg("Updated song list"); // use RefreshCustomSongs() instead?
-
-                //clear any leftover audio
-                //game will take care of this on it's own
-                /*if (audioFilePathField != null)
-                {
-                    MelonLogger.Msg(audioFilePath);
-                    if (Directory.Exists(audioFilePath))
-                    {
-                        Directory.Delete(audioFilePath, true);
-                    }
-                    MelonLogger.Msg("Deleted audio file");
-                }
-                else
-                {
-                    MelonLogger.Msg("Couldn't access audio file path");
-                }*/
-                
+                                
             }
             else
             {
@@ -242,6 +238,7 @@ namespace Trashbin
             Type buttonHelper = typeof(VRTK_InteractableObject_UnityEvents);
             VRTK_InteractableObject_UnityEvents buttonEvent = (VRTK_InteractableObject_UnityEvents)deleteButton.GetComponent(buttonHelper);
             buttonEvent.OnUse.RemoveAllListeners();
+            buttonEvent.OnUse.SetPersistentListenerState(1, UnityEngine.Events.UnityEventCallState.Off);
             deleteButton.SetActive(true);
             MelonLogger.Msg("set active");
             buttonEvent.OnUse.AddListener(cs_instance.DeleteSong);
