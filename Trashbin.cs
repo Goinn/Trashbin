@@ -91,7 +91,6 @@ namespace Trashbin
                     {
                         count = count + 1;
                     }
-                    if (count > 1)
                     readerImg.Close();
 
                     //delete song info from db
