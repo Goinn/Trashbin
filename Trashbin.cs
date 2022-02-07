@@ -162,8 +162,6 @@ namespace Trashbin
                 warnTimer.Elapsed += new ElapsedEventHandler(TimerEvent);
                 warnTimer.AutoReset = true;
                 warnTimer.Start();
-
-
             }
         }
 
@@ -178,17 +176,12 @@ namespace Trashbin
 
         private static void ButtonInit()
         {
-            bool twitchCredentials = false;
+            //bool twitchCredentials = false;
             var cs_instance = new Trashbin();
-            MelonLogger.Msg("Trashbin init");
 
             //Initialise new button
             GameObject songSelection = GameObject.Find("SongSelection");
-            Transform selectionSongPanel = songSelection.transform.Find("SelectionSongPanel");
-            Transform centralPanel = selectionSongPanel.Find("CentralPanel");
-            Transform songSelector = centralPanel.Find("Song Selection");
-            Transform visibleWrap = songSelector.Find("VisibleWrap");
-            Transform controls = visibleWrap.Find("Controls");
+            Transform controls = songSelection.transform.Find("SelectionSongPanel/CentralPanel/Song Selection/VisibleWrap/Controls");
             Transform blacklistButton = controls.Find("StandardButtonIcon - Blacklist");
             GameObject deleteButton = GameObject.Instantiate(blacklistButton.gameObject);
             deleteButton.transform.name = "DeleteSongButton";
@@ -196,13 +189,17 @@ namespace Trashbin
 
             //Change button icon
             Transform deleteIcon = deleteButton.transform.Find("Icon");
-            byte[] iconFile = File.ReadAllBytes("./Mods/Assets/bin.png");
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            Stream binStream = assembly.GetManifestResourceStream("Trashbin.Resources.bin.png");
+            MemoryStream mStream = new MemoryStream();
+            binStream.CopyTo(mStream);
             Texture2D iconTexture = new Texture2D(2, 2);
-            iconTexture.LoadImage(iconFile);
+            iconTexture.LoadImage(mStream.ToArray());
+
             iconTexture.name = "bt-Close-X";
-            Sprite iconSprite = Sprite.Create(iconTexture,new Rect(0,0.0f,iconTexture.width,iconTexture.height), new Vector2(0.5f, 0.5f));
+            Sprite iconSprite = Sprite.Create(iconTexture, new Rect(0, 0.0f, iconTexture.width, iconTexture.height), new Vector2(0.5f, 0.5f));
             iconSprite.name = "bt-X";
-            deleteIcon.GetComponent<SpriteRenderer>().sprite = iconSprite;
+            deleteIcon.GetComponent<SpriteRenderer>().sprite = iconSprite;            
             deleteIcon.localScale = new Vector3(0.15f, 0.15f, 1);
 
 
@@ -239,13 +236,11 @@ namespace Trashbin
             buttonEvent.OnUse.RemoveAllListeners();
             buttonEvent.OnUse.SetPersistentListenerState(1, UnityEngine.Events.UnityEventCallState.Off);
             deleteButton.SetActive(true);
-            MelonLogger.Msg("set active");
             buttonEvent.OnUse.AddListener(cs_instance.DeleteSong);
-
-            MelonLogger.Msg("Button added");
+             MelonLogger.Msg("Button added");
 
         }
-        public override void OnSceneWasInitialized(int buildIndex, string sceneName)
+public override void OnSceneWasInitialized(int buildIndex, string sceneName)
         {
             var mainMenuScenes = new List<string>() 
             {

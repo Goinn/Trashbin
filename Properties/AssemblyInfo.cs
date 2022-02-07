@@ -1,7 +1,5 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Trashbin;
 using MelonLoader;
 
 // Allgemeine Informationen über eine Assembly werden über die folgenden
