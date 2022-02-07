@@ -10,6 +10,7 @@ using Synth.Utils;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Timers;
+using Newtonsoft.Json;
 
 namespace Trashbin
 {
@@ -31,6 +32,7 @@ namespace Trashbin
             //ssmInstance.OpenPromptPanel(0);
             // get selected song
             string imageFilePath;
+            List<string> blacklist = new List<string>();
             Type ssm = typeof(Synth.SongSelection.SongSelectionManager);
             FieldInfo ssmInstanceInfo = ssm.GetField("s_instance", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
             Synth.SongSelection.SongSelectionManager ssmInstance = (Synth.SongSelection.SongSelectionManager)ssmInstanceInfo.GetValue(null);
@@ -51,14 +53,14 @@ namespace Trashbin
 
                 // remove from DB
                 SynthsFinder sf_instance = SynthsFinder.s_instance;
-                string text = Application.dataPath + "/../";
-                MelonLogger.Msg(text);
+                string mainDirPath = Application.dataPath + "/../";
+                MelonLogger.Msg(mainDirPath);
                 Type typeSF = typeof(SynthsFinder);
                 try
                 {
                     if (sf_instance.Dbcon == null)
                     {
-                        string connectionString = "URI=file:" + text + "/SynthDB";
+                        string connectionString = "URI=file:" + mainDirPath + "/SynthDB";
                         sf_instance.Dbcon = new SqliteConnection(connectionString);
                         sf_instance.Dbcon.Open();
                     }
@@ -128,6 +130,20 @@ namespace Trashbin
                         File.Delete(filePath);
                         MelonLogger.Msg("Deleted synth file " + ssmInstance.SelectedGameTrack.m_name);
                     }
+                    if (File.Exists(mainDirPath + "/NmBlacklist.json"))
+                    {
+                        blacklist = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(mainDirPath + "/NmBlacklist.json"));
+                        blacklist.Add(synthFile.Name);
+                        MelonLogger.Msg("test");
+                        File.WriteAllText(mainDirPath + "/NmBlacklist.json", JsonConvert.SerializeObject(blacklist));
+                    }
+                    else
+                    {
+                        StreamWriter blacklistStream = File.AppendText(mainDirPath + "/NmBlacklist.json");
+                        blacklist.Add(synthFile.Name);
+                        blacklistStream.Write(JsonConvert.SerializeObject(blacklist));
+                        blacklistStream.Close();
+                    }               
                 }
                 catch (Exception ex)
                 {
