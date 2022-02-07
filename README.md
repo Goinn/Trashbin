@@ -1,8 +1,11 @@
 # Trashbin
 
 Adds a button to delete songs for Synth Riders [PCVR]
+Deleted songs will be added to NoodleManagerX' blacklist
 
 ![preview](preview.png)
+
+
 
 ## Setup
 !After an update you might have to either grab the newest release of Trashbin or reinstall MelonLoader completely!
