@@ -37,6 +37,7 @@ namespace Trashbin
             FieldInfo ssmInstanceInfo = ssm.GetField("s_instance", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
             Synth.SongSelection.SongSelectionManager ssmInstance = (Synth.SongSelection.SongSelectionManager)ssmInstanceInfo.GetValue(null);
             int count = 0;
+            bool isDuplicate = false;
 
             if (ssmInstance.SelectedGameTrack.IsCustomSong)
             {
@@ -94,6 +95,10 @@ namespace Trashbin
                         count = count + 1;
                     }
                     readerImg.Close();
+                    if (count > 1)
+                    {
+                        isDuplicate = true;
+                    }
 
                     //delete song info from db
                     MelonLogger.Msg("Creating query");
@@ -130,20 +135,23 @@ namespace Trashbin
                         File.Delete(filePath);
                         MelonLogger.Msg("Deleted synth file " + ssmInstance.SelectedGameTrack.m_name);
                     }
-                    if (File.Exists(mainDirPath + "/NmBlacklist.json"))
+                    if (!isDuplicate)
                     {
-                        blacklist = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(mainDirPath + "/NmBlacklist.json"));
-                        blacklist.Add(synthFile.Name);
-                        MelonLogger.Msg("test");
-                        File.WriteAllText(mainDirPath + "/NmBlacklist.json", JsonConvert.SerializeObject(blacklist));
-                    }
-                    else
-                    {
-                        StreamWriter blacklistStream = File.AppendText(mainDirPath + "/NmBlacklist.json");
-                        blacklist.Add(synthFile.Name);
-                        blacklistStream.Write(JsonConvert.SerializeObject(blacklist));
-                        blacklistStream.Close();
-                    }               
+                        if (File.Exists(mainDirPath + "/NmBlacklist.json"))
+                        {
+                            blacklist = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(mainDirPath + "/NmBlacklist.json"));
+                            blacklist.Add(synthFile.Name);
+                            MelonLogger.Msg("test");
+                            File.WriteAllText(mainDirPath + "/NmBlacklist.json", JsonConvert.SerializeObject(blacklist));
+                        }
+                        else
+                        {
+                            StreamWriter blacklistStream = File.AppendText(mainDirPath + "/NmBlacklist.json");
+                            blacklist.Add(synthFile.Name);
+                            blacklistStream.Write(JsonConvert.SerializeObject(blacklist));
+                            blacklistStream.Close();
+                        }
+                    }                                 
                 }
                 catch (Exception ex)
                 {
@@ -153,7 +161,7 @@ namespace Trashbin
                 }
 
                 //Delete coresponding image file and leftover audio file
-                if (File.Exists(imageFilePath) & (count == 1))
+                if (File.Exists(imageFilePath) & (!isDuplicate))
                 {
                     File.Delete(imageFilePath);
                     MelonLogger.Msg("Deleted image file");
