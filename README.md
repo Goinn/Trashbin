@@ -1,7 +1,8 @@
 # Trashbin
 
 Adds a button to delete songs for Synth Riders [PCVR]
-Deleted songs will be added to NoodleManagerX' blacklist
+
+Deleted songs will be added to NoodleManagerX's blacklist
 
 ![preview](preview.png)
 
