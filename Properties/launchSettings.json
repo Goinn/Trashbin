@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "Trashbin": {
+      "commandName": "Project"
+    },
+    "SynthRiders": {
+      "commandName": "Executable",
+      "executablePath": "H:\\Program Files (x86)\\Steam\\steamapps\\common\\SynthRiders_Beta\\SynthRiders.exe",
+      "commandLineArgs": "--melonloader.debug --melonloader.launchdebugger",
+      "workingDirectory": "H:\\Program Files (x86)\\Steam\\steamapps\\common\\SynthRiders_Beta"
+    }
+  }
+}

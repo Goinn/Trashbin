@@ -1,6 +1,6 @@
-﻿using System.Reflection;
+﻿using MelonLoader;
+using System.Reflection;
 using System.Runtime.InteropServices;
-using MelonLoader;
 
 // Allgemeine Informationen über eine Assembly werden über die folgenden
 // Attribute gesteuert. Ändern Sie diese Attributwerte, um die Informationen zu ändern,
@@ -34,5 +34,5 @@ using MelonLoader;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: MelonInfo(typeof(Trashbin.Trashbin), "Trashbin", "1.3.0", "Moinn")]
+[assembly: MelonInfo(typeof(Trashbin.Trashbin), "Trashbin", "2.0.0", "Moinn")]
 [assembly: MelonGame("Kluge Interactive", "SynthRiders")]
