@@ -1,3 +1,8 @@
+# ARCHIVED
+
+Please go to https://github.com/bookdude13/Trashbin for the newest fork/version of the mod!
+
+
 # Trashbin
 
 Adds a button to delete songs for Synth Riders [PCVR]
